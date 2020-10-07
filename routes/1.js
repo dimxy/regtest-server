@@ -9,7 +9,8 @@ let typeforce = require('typeforce')
 let isHex64 = typeforce.HexN(64)
 
 let DBLIMIT = 440 // max sequential leveldb walk
-let NETWORK = bitcoin.networks.regtest
+//let NETWORK = bitcoin.networks.regtest
+let NETWORK = bitcoin.networks.dimxy14
 
 let sleep = ms => new Promise(r => setTimeout(r, ms))
 
@@ -111,6 +112,11 @@ module.exports = function (router, callback) {
     }, DBLIMIT, res.easy)
   })
 
+  router.get('/a/:address/ccunspents', addressWare, (req, res) => {
+    const { address } = req.params
+    rpc('getaddressutxos', [ {addresses: [ address ]}, true ], res.easy)
+  })
+
   router.get('/a/alt/:address/unspents', addressWare, async (req, res) => {
     // This is added to mimic a certain API for educational use.
     try {
@@ -162,11 +168,11 @@ module.exports = function (router, callback) {
   }
 
   router.get('/t/:id', hexWare, (req, res) => {
-    rpc('getrawtransaction', [req.params.id, false], res.easy)
+    rpc('getrawtransaction', [req.params.id, 0], res.easy)
   })
 
   router.get('/t/:id/json', hexWare, (req, res) => {
-    rpc('getrawtransaction', [req.params.id, true], (err, json) => {
+    rpc('getrawtransaction', [req.params.id, 1], (err, json) => {
       if (err) return res.easy(err)
 
       res.easy(null, rpcJSON2CB(json))
